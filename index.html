@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>С Днем Рождения! 🖤</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #0d0d0d;
+            color: #ffffff;
+            overflow-x: hidden;
+            overflow-y: auto; /* Разрешаем вертикальный скролл, если текст не влезает */
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* ГЛОБАЛЬНЫЙ КОНТЕЙНЕР ДЛЯ ПЛАВНЫХ ФОНОВ */
+        .bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        .bg-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transition: opacity 1.2s ease-in-out, transform 1.2s ease-in-out;
+            transform: scale(1.05); 
+            z-index: 1;
+        }
+
+        .bg-slide.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .bg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(13, 13, 13, 0.75), rgba(13, 13, 13, 0.75)); 
+            z-index: 2;
+        }
+
+        /* Текстовые экраны */
+        .screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            max-width: 450px;
+            width: 100%;
+            /* Вычисляем высоту за вычетом безопасных отступов */
+            min-height: calc(100vh - 60px); 
+            margin: 30px auto;
+            padding: 0 20px;
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Типографика адаптированная под мобильные */
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            line-height: 1.2;
+            letter-spacing: -1px;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #ff3333;
+        }
+
+        p {
+            font-size: 1rem;
+            font-weight: 300;
+            line-height: 1.6;
+            color: #b3b3b3;
+            margin-bottom: 35px;
+        }
+
+        /* Кнопки */
+        .btn {
+            background-color: #ffffff;
+            color: #0d0d0d;
+            border: none;
+            padding: 16px 32px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            flex-shrink: 0; /* Чтобы кнопка не сжималась на узких экранах */
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        /* Контейнер интерактива */
+        .buttons-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            position: relative;
+            min-height: 60px;
+        }
+
+        .btn-yes {
+            background-color: #ff3333; 
+            color: #ffffff;
+        }
+
+        .btn-no {
+            background-color: transparent;
+            color: #8c8c8c;
+            border: 1px solid #333333;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Билет */
+        .ticket {
+            border: 1px dashed #333333;
+            padding: 20px;
+            border-radius: 8px;
+            background: #141414;
+            width: 100%;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .ticket-header {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ff3333;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .ticket-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .ticket-label { color: #666666; }
+        .ticket-value { color: #ffffff; font-weight: 700; }
+
+        /* Стильный плеер с эквалайзером */
+        .mini-player {
+            width: 100%;
+            background: #141414;
+            padding: 14px 18px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-align: left;
+            border: 1px solid #222;
+        }
+
+        /* CSS Эквалайзер */
+        .equalizer {
+            display: flex;
+            align-items: flex-end;
+            height: 18px;
+            gap: 3px;
+            width: 30px;
+        }
+
+        .equalizer span {
+            display: block;
+            width: 3px;
+            background-color: #ff3333;
+            animation: bounce 0s infinite alternate ease-in-out;
+            transform-origin: bottom;
+        }
+
+        .equalizer span:nth-child(1) { height: 6px; animation-duration: 0.4s; }
+        .equalizer span:nth-child(2) { height: 14px; animation-duration: 0.7s; }
+        .equalizer span:nth-child(3) { height: 18px; animation-duration: 0.5s; }
+        .equalizer span:nth-child(4) { height: 10px; animation-duration: 0.6s; }
+
+        @keyframes bounce {
+            0% { transform: scaleY(0.3); }
+            100% { transform: scaleY(1.1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-container">
+        <div class="bg-slide active" id="bg1" style="background-image: url('bg1.jpg');"></div>
+        <div class="bg-slide" id="bg2" style="background-image: url('bg2.jpg');"></div>
+        <div class="bg-slide" id="bg3" style="background-image: url('bg3.jpg');"></div>
+        <div class="bg-slide" id="bg4" style="background-image: url('bg4.jpg');"></div>
+        <div class="bg-overlay"></div>
+    </div>
+
+    <audio id="bgMusic" src="music.mp3" loop></audio>
+
+    <div class="screen active" id="screen1">
+        <h1>Ксения!</h1>
+        <h2>С днем рождения! ❤️</h2>
+        <p>Иногда достаточно очень маленького времени, чтобы понять: человек рядом — особенный. И подарок хочется сделать соответствующим.</p>
+        <button class="btn" onclick="startExperience()">Открыть подарок</button>
+    </div>
+
+    <div class="screen" id="screen2">
+        <div class="mini-player">
+            <div style="font-size: 0.9rem;">
+                <span style="color: #666; display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;">Сейчас играет</span> 
+                <strong>Наш мэтч</strong>
+            </div>
+            <div class="equalizer">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+        <p>Наш первый разговор начался с Хаски - его треков и концертов. Удивительно, как под такую мрачную и тяжелую музыку между нами сразу появилось столько тепла и лёгкости.<br><br>Время с нашего первого разговора пролетело незаметно, и мне чертовски нравится то, что между нами начинается! Поэтому я подумал: почему бы не исполнить то, что я тебе предложил в первый же день...</p>
+        <button class="btn" onclick="nextScreen(3)">...продолжить вживую?</button>
+    </div>
+
+    <div class="screen" id="screen3">
+        <h1>Пойдем вместе на концерт Хаски?</h1>
+        <p>Хочу, чтобы это стало нашим большим общим воспоминанием!</p>
+        <div class="buttons-container">
+            <button class="btn btn-yes" onclick="nextScreen(4)">Да, с удовольствием!</button>
+            <button class="btn btn-no" id="runBtn">Я подумаю</button>
+        </div>
+    </div>
+
+    <div class="screen" id="screen4">
+        <h1>Ура!!! Она согласна!</h1>
+        <img src="poster.jpg" style="width: 100%; max-width: 240px; height: auto; border-radius: 4px; margin-bottom: 20px; object-fit: cover;" alt="Постер Хаски">
+        <div class="ticket">
+            <div class="ticket-header">Мой подарок тебе!</div>
+            <div class="ticket-row">
+                <span class="ticket-label">Кто:</span>
+                <span class="ticket-value">ХАСКИ</span>
+            </div>
+            <div class="ticket-row">
+                <span class="ticket-label">Спутник:</span>
+                <span class="ticket-value">Самая крутая девушка</span>
+            </div>
+            <div class="ticket-row">
+                <span class="ticket-label">Билеты:</span>
+                <span class="ticket-value">Уже у меня в кармане</span>
+            </div>
+        </div>
+        <p style="margin-bottom: 0;">С тебя — свободный вечер и готовность проорать все песни! Скоро скину все подробности в чат! ✨</p>
+    </div>
+
+    <script>
+        function startExperience() {
+            const music = document.getElementById('bgMusic');
+            music.play().catch(function(error) {
+                console.log("Браузер заблокировал звук:", error);
+            });
+            nextScreen(2);
+        }
+
+        function nextScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('screen' + screenId).classList.add('active');
+
+            document.querySelectorAll('.bg-slide').forEach(b => b.classList.remove('active'));
+            document.getElementById('bg' + screenId).classList.add('active');
+            
+            // Сбрасываем скролл страницы вверх при переключении экрана
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        const runBtn = document.getElementById('runBtn');
+        
+        function moveButton() {
+            const randomX = (Math.random() - 0.5) * 160; 
+            const randomY = (Math.random() - 0.5) * 250; 
+            
+            const finalX = randomX + (randomX > 0 ? 30 : -30);
+            const finalY = randomY + (randomY > 0 ? 30 : -30);
+            
+            runBtn.style.transform = `translate(${finalX}px, ${finalY}px)`;
+        }
+
+        runBtn.addEventListener('mouseover', moveButton);
+        runBtn.addEventListener('touchstart', function(e) {
+            e.preventDefault(); 
+            moveButton();
+        });
+        runBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            moveButton();
+        });
+    </script>
+</body>
+</html>
